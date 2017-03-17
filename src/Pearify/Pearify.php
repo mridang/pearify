@@ -44,20 +44,18 @@ class Pearify
 
     public function process()
     {
-        ini_set('xdebug.var_display_max_depth', 5);
-        ini_set('xdebug.var_display_max_children', 256);
-        ini_set('xdebug.var_display_max_data', 1024);
         Logger::debug("Using %s as the temporary directory", $this->temp_dir);
         $packages = ComposerUtils::getDirectories();
         $vendors = implode(DIRECTORY_SEPARATOR, array(dirname(dirname(dirname(__FILE__))), 'vendor'));
-        $parts = array(dirname(dirname(dirname(__FILE__))), "vendor", "composer", "autoload_classmap.php");
+        $vendir = dirname(dirname(dirname(dirname(dirname(__FILE__)))));
+        $parts = array($vendir, "composer", "autoload_classmap.php");
         /** @noinspection PhpIncludeInspection */
         $files = include implode(DIRECTORY_SEPARATOR, $parts);
 
         $map = array();
         foreach ($files as $class => $path) {
             foreach ($packages as $package) {
-                if (0 === strpos($path, implode(DIRECTORY_SEPARATOR, array($vendors, $package)))) {
+                if (0 === strpos($path, implode(DIRECTORY_SEPARATOR, array($vendir, $package)))) {
                     Logger::debug("Mapping file %s", $path);
                     $file = new File(file_get_contents($path));
                     $namespace = $file->getNamespace();
@@ -69,13 +67,15 @@ class Pearify
 
                     $map[$namespace][] = new Classname($name);
                     Logger::info("Found class %s in namespace %s", array($name, $namespace));
+                } else {
+                    Logger::trace("File %s not in list of allowed packages", array($path));
                 }
             }
         }
 
         foreach ($files as $class => $path) {
             foreach ($packages as $package) {
-                if (0 === strpos($path, implode(DIRECTORY_SEPARATOR, array($vendors, $package)))) {
+                if (0 === strpos($path, implode(DIRECTORY_SEPARATOR, array($vendir, $package)))) {
                     echo $path . PHP_EOL;
                     Logger::info("Processing file %s", $path);
                     $f = new File(file_get_contents($path));

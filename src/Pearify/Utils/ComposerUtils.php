@@ -28,7 +28,7 @@ class ComposerUtils
     public static function getDirectories() {
         Logger::info("Resolving dependencies for project");
         $packages = array();
-        $root = dirname(dirname(dirname(dirname(__FILE__))));
+        $root = dirname(dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))));
         $composer = file_get_contents($root . DIRECTORY_SEPARATOR . 'composer.json');
         $composer = json_decode($composer, true);
         if (array_key_exists('require', $composer) && !empty($composer['require'])) {
@@ -54,8 +54,8 @@ class ComposerUtils
      */
     public static function readFile($package)
     {
-        $root = dirname(dirname(dirname(dirname(__FILE__))));
-        $path = implode(DIRECTORY_SEPARATOR, array($root, 'vendor', $package, 'composer.json'));
+        $root = dirname(dirname(dirname(dirname(dirname(dirname(__FILE__))))));
+        $path = implode(DIRECTORY_SEPARATOR, array($root, $package, 'composer.json'));
         Logger::trace("Reading composer file %s", $path);
         if (file_exists($path)) {
             $composer = json_decode(file_get_contents($path), true);

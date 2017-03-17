@@ -36,5 +36,7 @@ require_once dirname(__FILE__) . '/Pearify/Utils/' . 'ComposerUtils.php';
 require_once dirname(__FILE__) . '/Pearify/Utils/' . 'TokenUtils.php';
 require_once dirname(__FILE__) . '/Pearify/Ops/' . 'DocblockFixer.php';
 require_once dirname(__FILE__).'/Pearify/Utils/'.'ClassFinder.php';
+require_once dirname(__FILE__).'/Pearify/'.'File.php';
+require_once dirname(__FILE__).'/Pearify/'.'UseAs.php';
 require_once dirname(__FILE__).'/Pearify/'.'Pearify.php';
 require_once dirname(__FILE__).'/Pearify/'.'Command.php';
