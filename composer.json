@@ -1,14 +1,33 @@
 {
-    "require": {
-        "symfony/console": "^2.5 || ^3.0",
-        "nosto/php-sdk": "dev-feature/refactor-and-improve-sdk"
+    "name": "mridang/pearify",
+    "description": "Pearify converts PSR-4 Composer packages to PEAR compliant code.",
+    "keywords": [
+        "package",
+        "magento",
+        "psr-4",
+        "pear"
+    ],
+    "homepage": "https://github.com/mridang/pearify",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mridang Agarwalla",
+            "email": "mridang.agarwalla+pearify@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/mridang/pearify/issues"
     },
-    "require-dev": {
-        "phpunit/phpunit": "~4"
+    "require": {
+        "symfony/console": "^2.5 || ^3.0"
     },
     "autoload": {
         "psr-4": {
             "Mtibben\\PhpClassRename\\": ["src/", "tests/"]
         }
-    }
+    },
+    "bin": [
+        "bin/pearify"
+    ]
 }
