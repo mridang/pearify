@@ -66,4 +66,16 @@ class Logger
         /** @noinspection HtmlUnknownTag */
         Logger::$output->writeln('<fg=white>' . vsprintf($message, $args));
     }
+
+    /**
+     * Prints an info log message to the console with the warn message colour
+     *
+     * @param $message string the log message
+     * @param array $args the array of format parameters
+     */
+    public static function warn($message, $args = array())
+    {
+        /** @noinspection HtmlUnknownTag */
+        Logger::$output->writeln('<fg=red>' . vsprintf($message, $args));
+    }
 }

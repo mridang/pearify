@@ -16,6 +16,7 @@
 namespace Pearify\Pearify;
 
 use Pearify\Classname;
+use Pearify\Configuration;
 use Pearify\File;
 use Pearify\Logger;
 use Pearify\Utils\ComposerUtils;
@@ -51,6 +52,7 @@ class Pearify
         $parts = array($vendir, "composer", "autoload_classmap.php");
         /** @noinspection PhpIncludeInspection */
         $files = include implode(DIRECTORY_SEPARATOR, $parts);
+        $config = new Configuration();
 
         $map = array();
         foreach ($files as $class => $path) {
@@ -80,8 +82,8 @@ class Pearify
                     Logger::info("Processing file %s", $path);
                     $f = new File(file_get_contents($path));
                     Logger::info("Renamed %s to %s", array($f->getFullClassname(), $f->getMagentfiedClassname()));
-                    $f->setClassname($f->getMagentfiedClassname());
-                    $f->findAndShortenClasses($map[$f->getNamespace()]);
+                    $f->setClassname($config->replace($f->getMagentfiedClassname()));
+                    $f->findAndShortenClasses($map[$f->getNamespace()], $config);
                     $f->removeUses();
                     $f->removeNamespace();
                     //TODO: Whitespaces could be removed here
