@@ -86,13 +86,13 @@ class File
         }
     }
 
-    public function findAndShortenClasses($map)
+    public function findAndShortenClasses($map, Configuration $config)
     {
         $finder = new ClassFinder($this);
         $classesToFix = iterator_to_array($finder->find());
         Logger::debug("Shortening %d classes", count($classesToFix));
-        $this->shortenClasses($classesToFix);
-        $this->tokens = DocblockFixer::fix($this, $map)->tokens;
+        $this->shortenClasses($classesToFix, $config);
+        $this->tokens = DocblockFixer::fix($this, $map, $config)->tokens;
     }
 
     public function getClass()
@@ -229,8 +229,9 @@ class File
      * fixClasses replaces all classnames with the shortest version of a class name possible
      *
      * @param $classesToFix
+     * @param $config
      */
-    public function shortenClasses($classesToFix)
+    public function shortenClasses($classesToFix, Configuration $config)
     {
         $cumulativeOffset = 0;
 
@@ -248,7 +249,7 @@ class File
 
             if (!$replacement) {
                 $resolvedClass = $this->resolveClass($c);
-                $alias = $this->originalUse->getAliasForClassname($resolvedClass);
+                $alias = $config->replace($this->originalUse->getAliasForClassname($resolvedClass));
                 Logger::trace("Resolved class %s to %s", array($resolvedClass->classname, $alias));
                 $replacement = array(array(308, $alias, 2));
             }

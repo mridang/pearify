@@ -16,6 +16,7 @@
 namespace Pearify\Ops;
 
 use Pearify\Classname;
+use Pearify\Configuration;
 use Pearify\File;
 use Pearify\TokenUtils;
 
@@ -46,9 +47,10 @@ class DocblockFixer
      *
      * @param File $file the file object whose doc-blocks should be parsed and corrected
      * @param $map Classname[] an additional array of classnames to be searched for
+     * @param $config Configuration the replacement configuration to be used
      * @return File the modified file object with all the doc-blocks checked and corrected
      */
-    public static function fix(File $file, $map)
+    public static function fix(File $file, $map, Configuration $config)
     {
         foreach ($file->originalUse->classnames as $use) {
             $map[] = $use['classname'];
@@ -60,8 +62,8 @@ class DocblockFixer
             if (!is_string($token) && TokenUtils::isTokenType($token, T_DOC_COMMENT)) {
                 /** @var Classname $class */
                 foreach ($map as $class) {
-                    $token[1] = self::replace($class->nameWithNamespace(), $class, $token);
-                    $token[1] = self::replace($class->nameWithoutNamespace(), $class, $token);
+                    $token[1] = self::replace($class->nameWithNamespace(), $class, $token, $config);
+                    $token[1] = self::replace($class->nameWithoutNamespace(), $class, $token, $config);
                 }
                 $file->tokens[$id] = $token;
             }
@@ -70,9 +72,9 @@ class DocblockFixer
         return $file;
     }
 
-    private static function replace($oldName, Classname $className, $docBlock) {
+    private static function replace($oldName, Classname $className, $docBlock, Configuration $config) {
         $search = '/([\s|]+)(' . str_replace('\\', '\\\\', '[\\]?' . $oldName) . ')([\s|\[])/';
-        $replacement = '${1}' . $className->pearifiedName() . '${3}';
+        $replacement = '${1}' . $config->replace($className->pearifiedName()) . '${3}';
         return preg_replace($search, $replacement, $docBlock[1]);
     }
 }
