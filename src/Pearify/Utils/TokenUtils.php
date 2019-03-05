@@ -98,7 +98,7 @@ class TokenUtils
     {
         $seqIterator = (new ArrayObject($tokenSequence))->getIterator();
         $tokenIterator = (new ArrayObject($tokens))->getIterator();
-        if ($startFrom != null) {
+        if ($startFrom !== null) {
             $tokenIterator->seek($startFrom);
         }
         while ($tokenIterator->valid()) {

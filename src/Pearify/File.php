@@ -24,6 +24,7 @@ class File
     public $tokens;
     public $originalUse;
     private $originalNamespace;
+    private $lastClassKey;
 
     public function __construct($src)
     {
@@ -78,12 +79,69 @@ class File
         if ($positions) {
             Logger::trace("Removing use statements from file");
             $offset = $positions[0][0];
+            if (!empty($offset) && $this->hasTraitsUse()) {
+                // Calculate distance to class declaration and subtract here
+                foreach ($positions as $key => $position) {
+                    if ($position[0] > $this->lastClassKey) {
+                        unset($positions[$key]);
+                    }
+                }
+            }
             $length = $positions[count($positions) - 1][1] - $offset + 1;
 
             array_splice($this->tokens, $offset, $length);
         } else {
             Logger::trace("No use statements to be removed from the file");
         }
+    }
+
+    /**
+     * Helper function to check if file has use
+     * statement after class declaration.
+     * Also set class variable with latest class declaration token position
+     *
+     * @return bool
+     */
+    private function hasTraitsUse()
+    {
+        $this->lastClassKey = null; // Clear to avoid old values
+        foreach ($this->tokens as $key => $token) {
+            if (!empty($token[1]) && $token[1] === 'class') {
+                $lineNumber = $token[2];
+                // If the previous token is in a line before
+                // means class keyword is not a class declaration statement
+                if (!empty($this->tokens[$key - 1])
+                    && $this->tokens[$key - 1][2] !== $lineNumber
+                ) {
+                    // Check for use statements from the class declaration onwards
+                    for ($i = $key, $max = count($this->tokens); $i < $max; $i++) { //150
+                        if(!is_array($this->tokens[$i])) {
+                            // We may have elements only with ';', so skip it
+                            continue;
+                        }
+                        // If has a use statement after class declaration and this is
+                        // the first statement of the line, we have traits in the class
+                        if ($this->tokens[$i][1] === 'use'
+                            && !empty($this->tokens[$i - 1][2])
+                            && $i[2] !== $this->tokens[$i - 1][2]
+                        ) {
+                            // $key is where the class statement is located
+                            $this->lastClassKey = $key;
+                            return true;
+                        }
+                        // Break if find public/protected/private for better performance
+                        if ($this->tokens[$i][1] === 'public'
+                            || $this->tokens[$i][1] === 'private'
+                            || $this->tokens[$i][1] === 'protected'
+                        ) {
+                            return false;
+                        }
+                    }
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
     public function findAndShortenClasses($map, Configuration $config)
