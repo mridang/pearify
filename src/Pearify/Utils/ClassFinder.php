@@ -55,6 +55,12 @@ class ClassFinder
                     $j++;
                 }
 
+            } elseif (TokenUtils::isTokenType($t, array(T_USE))) {
+                $c = self::findClassInNextTokens($this->file->tokens, $i + 2);
+                // Check if use statement is after class opening bracket
+                if ($c && $this->isAfterOpeningBracket($c)) {
+                    yield $c;
+                }
             } elseif (TokenUtils::isTokenType($t, array(T_PAAMAYIM_NEKUDOTAYIM, T_DOUBLE_COLON))) {
                 $c = self::findClassInPreviousTokens($this->file->tokens, $i - 1);
                 if ($c) {
@@ -96,6 +102,24 @@ class ClassFinder
 
             }
         }
+    }
+
+    /**
+     * Returns if given token is after a opening bracket
+     *
+     * @param $c
+     * @return bool
+     */
+    private function isAfterOpeningBracket($c)
+    {
+        for ($k = $c->from; $k >= 0; $k--) {
+            if (is_string($this->file->tokens[$k])
+                && $this->file->tokens[$k] === '{'
+            ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static function findClassInNextTokens($tokens, $i)

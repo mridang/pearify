@@ -114,7 +114,7 @@ class File
                     && $this->tokens[$key - 1][2] !== $lineNumber
                 ) {
                     // Check for use statements from the class declaration onwards
-                    for ($i = $key, $max = count($this->tokens); $i < $max; $i++) { //150
+                    for ($i = $key, $max = count($this->tokens); $i < $max; $i++) {
                         if(!is_array($this->tokens[$i])) {
                             // We may have elements only with ';', so skip it
                             continue;
