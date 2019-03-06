@@ -96,8 +96,7 @@ class File
     }
 
     /**
-     * Helper function to check if file has use
-     * statement after class declaration.
+     * Check if file has use statement after class declaration.
      * Also set class variable with latest class declaration token position
      *
      * @return bool
@@ -106,37 +105,38 @@ class File
     {
         $this->lastClassKey = null; // Clear to avoid old values
         foreach ($this->tokens as $key => $token) {
-            if (!empty($token[1]) && $token[1] === 'class') {
-                $lineNumber = $token[2];
-                // If the previous token is in a line before
-                // means class keyword is not a class declaration statement
-                if (!empty($this->tokens[$key - 1])
-                    && $this->tokens[$key - 1][2] !== $lineNumber
+            if (empty($token[1]) || $token[1] !== 'class') {
+                return false;
+            }
+            $lineNumber = $token[2];
+            // If the previous token is in a line before
+            // means class keyword is not a class declaration statement
+            if (empty($this->tokens[$key - 1])
+                || $this->tokens[$key - 1][2] === $lineNumber
+            ) {
+                return false;
+            }
+            // Check for use statements from the class declaration onwards
+            for ($i = $key, $max = count($this->tokens); $i < $max; $i++) {
+                if(!is_array($this->tokens[$i])) {
+                    // We may have elements only with ';', so skip it
+                    continue;
+                }
+                // If has a use statement after class declaration and this is
+                // the first statement of the line, we have traits in the class
+                if ($this->tokens[$i][1] === 'use'
+                    && !empty($this->tokens[$i - 1][2])
+                    && $i[2] !== $this->tokens[$i - 1][2]
                 ) {
-                    // Check for use statements from the class declaration onwards
-                    for ($i = $key, $max = count($this->tokens); $i < $max; $i++) {
-                        if(!is_array($this->tokens[$i])) {
-                            // We may have elements only with ';', so skip it
-                            continue;
-                        }
-                        // If has a use statement after class declaration and this is
-                        // the first statement of the line, we have traits in the class
-                        if ($this->tokens[$i][1] === 'use'
-                            && !empty($this->tokens[$i - 1][2])
-                            && $i[2] !== $this->tokens[$i - 1][2]
-                        ) {
-                            // $key is where the class statement is located
-                            $this->lastClassKey = $key;
-                            return true;
-                        }
-                        // Break if find public/protected/private for better performance
-                        if ($this->tokens[$i][1] === 'public'
-                            || $this->tokens[$i][1] === 'private'
-                            || $this->tokens[$i][1] === 'protected'
-                        ) {
-                            return false;
-                        }
-                    }
+                    // $key is where the class statement is located
+                    $this->lastClassKey = $key;
+                    return true;
+                }
+                // Break if find public/protected/private for better performance
+                if ($this->tokens[$i][1] === 'public'
+                    || $this->tokens[$i][1] === 'private'
+                    || $this->tokens[$i][1] === 'protected'
+                ) {
                     return false;
                 }
             }
