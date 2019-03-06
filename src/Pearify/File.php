@@ -132,10 +132,11 @@ class File
                     $this->lastClassKey = $key;
                     return true;
                 }
-                // Break if find public/protected/private for better performance
+                // Break if find public/protected/private or constants for better performance
                 if ($this->tokens[$i][1] === 'public'
                     || $this->tokens[$i][1] === 'private'
                     || $this->tokens[$i][1] === 'protected'
+                    || $this->tokens[$i][1] === 'const'
                 ) {
                     return false;
                 }
