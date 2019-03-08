@@ -24,11 +24,21 @@ class ClassFinder
     const IGNORED_KEYWORDS = ['parent', 'self', 'static'];
     private $file;
 
+    /**
+     * ClassFinder constructor.
+     *
+     * @param File $file
+     */
     public function __construct(File $file)
     {
         $this->file = $file;
     }
 
+    /**
+     * Generator function that returns a FoundClass if found
+     *
+     * @return \Generator
+     */
     public function find()
     {
         foreach ($this->file->tokens as $i => $t) {
@@ -54,7 +64,6 @@ class ClassFinder
                     }
                     $j++;
                 }
-
             } elseif (TokenUtils::isTokenType($t, array(T_USE))) {
                 $c = self::findClassInNextTokens($this->file->tokens, $i + 2);
                 // Check if use statement is after class opening bracket
@@ -90,7 +99,7 @@ class ClassFinder
 
                 while ($this->file->tokens[$j] != ")") {
                     if ($this->file->tokens[$j] == ',') {
-                        // +2 to consume comma and whitepace
+                        // +2 to consume comma and whitespace
                         $c = self::findClassInNextTokens($this->file->tokens, $j + 2);
                         if ($c) {
                             yield $c;
@@ -124,7 +133,7 @@ class ClassFinder
 
     /**
      * Given an index $i, walk through remaining tokens and returns
-     * a class if found
+     * a FoundClass if found
      *
      * @param $tokens
      * @param int $i
@@ -144,6 +153,14 @@ class ClassFinder
         return null;
     }
 
+    /**
+     * Given an index $i, walk backwards through tokens and returns
+     * a FoundClass if found
+     *
+     * @param $tokens
+     * @param $i
+     * @return FoundClass|null
+     */
     public static function findClassInPreviousTokens($tokens, $i)
     {
         $classname = '';

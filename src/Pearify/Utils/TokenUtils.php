@@ -84,8 +84,6 @@ class TokenUtils
                 $seqIterator->next();
             }
         }
-
-        return;
     }
 
     /**
@@ -133,8 +131,6 @@ class TokenUtils
                 $seqIterator->next();
             }
         }
-
-        return;
     }
 
     /**
@@ -157,7 +153,7 @@ class TokenUtils
      * Checks whether a given token is any one of the specified token types
      *
      * @param array $token the token to check
-     * @param array $types the array of types
+     * @param array|int $types the array of types
      * @return bool true if the token matches one the types
      */
     public static function isTokenType($token, $types)
