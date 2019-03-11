@@ -24,6 +24,7 @@ class File
     public $tokens;
     public $originalUse;
     private $originalNamespace;
+    private $lastClassKey;
 
     public function __construct($src)
     {

@@ -24,11 +24,21 @@ class ClassFinder
     const IGNORED_KEYWORDS = ['parent', 'self', 'static'];
     private $file;
 
+    /**
+     * ClassFinder constructor.
+     *
+     * @param File $file
+     */
     public function __construct(File $file)
     {
         $this->file = $file;
     }
 
+    /**
+     * Generator function that returns a FoundClass if found
+     *
+     * @return \Generator
+     */
     public function find()
     {
         foreach ($this->file->tokens as $i => $t) {
@@ -45,8 +55,8 @@ class ClassFinder
                     yield $c;
                 }
                 $j = $c->to + 1;
-                while ($this->file->tokens[$j] == ",") {
-                    // +2 to consume comma and whitepace
+                while ($this->file->tokens[$j] === ',') {
+                    // +2 to consume comma and whitespace
                     $c = self::findClassInNextTokens($this->file->tokens, $j + 2);
                     if ($c) {
                         yield $c;
@@ -54,7 +64,12 @@ class ClassFinder
                     }
                     $j++;
                 }
-
+            } elseif (TokenUtils::isTokenType($t, array(T_USE))) {
+                $c = self::findClassInNextTokens($this->file->tokens, $i + 2);
+                // Check if use statement is after class opening bracket
+                if ($c && $this->isAfterOpeningBracket($c)) {
+                    yield $c;
+                }
             } elseif (TokenUtils::isTokenType($t, array(T_PAAMAYIM_NEKUDOTAYIM, T_DOUBLE_COLON))) {
                 $c = self::findClassInPreviousTokens($this->file->tokens, $i - 1);
                 if ($c) {
@@ -84,7 +99,7 @@ class ClassFinder
 
                 while ($this->file->tokens[$j] != ")") {
                     if ($this->file->tokens[$j] == ',') {
-                        // +2 to consume comma and whitepace
+                        // +2 to consume comma and whitespace
                         $c = self::findClassInNextTokens($this->file->tokens, $j + 2);
                         if ($c) {
                             yield $c;
@@ -98,6 +113,32 @@ class ClassFinder
         }
     }
 
+    /**
+     * Returns if given token is after a opening bracket
+     *
+     * @param FoundClass $c
+     * @return bool
+     */
+    private function isAfterOpeningBracket(FoundClass $c)
+    {
+        for ($k = $c->from; $k >= 0; $k--) {
+            if (is_string($this->file->tokens[$k])
+                && $this->file->tokens[$k] === '{'
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Given an index $i, walk through remaining tokens and returns
+     * a FoundClass if found
+     *
+     * @param $tokens
+     * @param int $i
+     * @return FoundClass|null
+     */
     public static function findClassInNextTokens($tokens, $i)
     {
         $classname = '';
@@ -112,6 +153,14 @@ class ClassFinder
         return null;
     }
 
+    /**
+     * Given an index $i, walk backwards through tokens and returns
+     * a FoundClass if found
+     *
+     * @param $tokens
+     * @param $i
+     * @return FoundClass|null
+     */
     public static function findClassInPreviousTokens($tokens, $i)
     {
         $classname = '';
